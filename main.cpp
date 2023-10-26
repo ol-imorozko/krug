@@ -73,14 +73,14 @@ private:
   double _y;
 };
 
-void set_cursor_position(int x, int y) { printf("\033[%d;%dH", x + 1, y + 1); }
+void set_cursor_position(int x, int y) { printf("\033[%d;%dH", x, y); }
 
 void clean_terminal() { printf("\033[2J"); }
 
 double sin_oscilate(double coeff, int shifts, double border = 0)
 {
     double shift = sin(2 * M_PI * shifts * coeff);
-    shift = shift > 0 ? shift - border : shift + border;
+    /* shift = shift > 0 ? shift - border : shift + border; */
     return shift;
 }
 
@@ -103,25 +103,27 @@ int main() {
   clean_terminal();
 
   for (int iter = 0; iter < iters; iter++) {
+    set_cursor_position(0, 0);
+    putchar('\n');
     for (unsigned i = 0; i < height; i++) {
       for (unsigned j = 0; j < width; j++) {
         Point p(i, j);
         p.normalize(height, width);
 
-        /* Point center(0, sin_oscilate((double)iter / iters, shifts)); */
-        Point center(0, 0);
+        Point center(0, sin_oscilate((double)iter / iters, shifts));
+        /* Point center(0, 0); */
 
         c = (center.dist(p, aspect) <= radius) ? '@' : ' ';
 
-        /* if (c != field[i][j]) { */
-        /*   set_cursor_position(i, j); */
-        /*   putchar(c); */
+        if (c != field[i][j]) {
+          set_cursor_position(i, j);
+          putchar(c);
           field[i][j] = c;
-        /* } */
+        }
       }
     }
 
-    printf("%s", field.data());
+    /* printf("%s", field.data()); */
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
